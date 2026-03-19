@@ -37,7 +37,7 @@ infos_setores2 <- infos_setores2 |>
   dplyr::rename(CD_SETOR = CD_setor)
 
 # ------------------------
-# 3. Filtrar RJ pelo código do setor
+# 3. Filtrar cidade do Rio de Janeiro pelo código do setor
 # ------------------------
 
 infos_setores_rj <- infos_setores |>
@@ -47,14 +47,14 @@ infos_setores2_rj <- infos_setores2 |>
   dplyr::filter(substr(CD_SETOR, 1, 7) == "3304557")
 
 # ------------------------
-# 4. Merge das bases de setores censitários
+# 4. Merge das bases de setores censitários para ter infos de alfabetização e cor/raça
 # ------------------------
 
 base_setores <- infos_setores_rj |>
   dplyr::left_join(infos_setores2_rj, by = "CD_SETOR")
 
 # ------------------------
-# 5. Malha territorial (setores + bairros)
+# 5. Malha territorial (setores e bairros)
 # ------------------------
 
 setores_rj <- sf::st_read("dados/brutos/RJ_setores_CD2022/RJ_setores_CD2022.shp") |>
@@ -64,7 +64,7 @@ bairros_rj <- sf::st_read("dados/brutos/RJ_bairros_CD2022/RJ_bairros_CD2022.shp"
   dplyr::filter(CD_MUN == "3304557")
 
 # ------------------------
-# 6. Join malha territorial com informações dos setores
+# 6. Join malha territorial de setores com informações dos setores
 # ------------------------
 
 base_setores_geo <- setores_rj |>
@@ -81,7 +81,7 @@ colunas_para_tratar <- names(base_setores_geo)[
 base_setores_geo <- tratar_colunas(base_setores_geo, colunas_para_tratar)
 
 # ------------------------
-# 8. Join espacial setor → bairro
+# 8. Join espacial dos setores para bairros
 # ------------------------
 
 setores_com_bairro <- sf::st_join(base_setores_geo, bairros_rj)
@@ -89,19 +89,21 @@ setores_com_bairro <- sf::st_join(base_setores_geo, bairros_rj)
 setores_com_bairro <- setores_com_bairro |>
   dplyr::rename(
     NM_BAIRRO = NM_BAIRRO.y,
-    CD_BAIRRO = CD_BAIRRO.y   # 👈 ADICIONAR ISSO
+    CD_BAIRRO = CD_BAIRRO.y   
   )
+
+# a variável de CD_BAIRRO é a que veio da base de shape files do bairro mesmo e ainda não era numérica
 
 setores_com_bairro <- setores_com_bairro %>%
   mutate(
     CD_BAIRRO = as.numeric(CD_BAIRRO)
- )
+ ) 
 
 # ------------------------
 # 9. Agregação por bairro (somando todas colunas numéricas)
 # ------------------------
 
-# remover colunas que não devem ser somadas (ex: códigos)
+# Somar dentro do mesmo bairro colunas de variáveis do CD2022
 colunas_para_somar <- names(setores_com_bairro)[
   grepl("^V", names(setores_com_bairro))]
 

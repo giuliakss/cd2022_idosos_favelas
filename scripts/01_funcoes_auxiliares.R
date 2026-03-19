@@ -1,5 +1,5 @@
 # ========================================
-# Funções auxiliares do projeto (cumulativas)
+# Funções auxiliares interdependentes (cada função depende da anterior)
 # ========================================
 
 

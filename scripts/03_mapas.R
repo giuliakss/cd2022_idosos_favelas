@@ -6,6 +6,7 @@ library(dplyr)
 library(sf)
 library(leaflet)
 library(ggplot2)
+library(ggspatial)
 
 source("scripts/00_variaveis.R")
 
@@ -41,7 +42,7 @@ base_bairros <- base_bairros %>%
   )
 
 # ------------------------
-# 4. MAPA 1 - BAIRROS
+# 4. MAPA 1 - PERCENTUAL DE IDOSOS POR BAIRROS
 # ------------------------
 
 base_bairros <- st_transform(base_bairros, 4326)
@@ -70,7 +71,7 @@ base_setores <- st_transform(base_setores, 4326)
 setores_favela <- base_setores %>%
   filter(CD_TIPO == "1")
 
-# setores fora de favela (AJUSTE AQUI)
+# setores fora de favela e urbanos
 setores_nao_favela <- base_setores %>%
   filter(CD_TIPO != "1", CD_SIT %in% c(1, 2, 3))
 
@@ -78,10 +79,10 @@ setores_nao_favela <- base_setores %>%
 # 6. Construir base do mapa 2
 # ------------------------
 
-# ---- FAVELAS (AJUSTE AQUI)
+# ---- FAVELAS 
 favelas <- setores_favela %>%
   mutate(
-    id_favela = ifelse(is.na(NM_FCU), paste0("favela_", CD_SETOR), NM_FCU)
+    id_favela = NM_FCU
   ) %>%
   group_by(id_favela) %>%
   summarise(
@@ -112,14 +113,18 @@ bairros_info <- setores_nao_favela %>%
   ) %>%
   mutate(
     perc_idosos = ifelse(pop_total > 0, pop_idosa / pop_total * 100, NA),
-    tipo = "bairro_sem_favela"
+    tipo = "bairro_ex_FCU"
   )
 
-# aplicar recorte espacial
 bairros_sem_favela <- base_bairros %>%
   select(CD_BAIRRO, NM_BAIRRO, geometry) %>%
   st_difference(favelas_union) %>%
-  left_join(bairros_info, by = c("CD_BAIRRO", "NM_BAIRRO")) %>%
+  st_collection_extract("POLYGON") %>%
+  left_join(
+    st_drop_geometry(bairros_info),
+    by = c("CD_BAIRRO", "NM_BAIRRO")
+  ) %>%
+  filter(pop_total > 0) %>%   
   mutate(nome = NM_BAIRRO)
 
 # ---- BASE FINAL
@@ -154,7 +159,7 @@ popup = ~paste0(
 
 mapa2
 
-# salvar versão interativa (AJUSTE AQUI)
+# salvar versão interativa 
 htmlwidgets::saveWidget(mapa2, "resultados/mapa2.html", selfcontained = FALSE)
 
 # ------------------------
@@ -163,32 +168,49 @@ htmlwidgets::saveWidget(mapa2, "resultados/mapa2.html", selfcontained = FALSE)
 
 mapa2_static <- ggplot() +
   
+  # Bairros (base)
   geom_sf(
     data = base_mapa2 %>% dplyr::filter(tipo == "bairro_sem_favela"),
-    aes(fill = perc_idosos),
-    color = "white",
-    size = 0.1
-  ) +
-  
-  geom_sf(
-    data = base_mapa2 %>% dplyr::filter(tipo == "favela"),
     aes(fill = perc_idosos),
     color = "black",
     size = 0.3
   ) +
   
-  scale_fill_distiller(
-    palette = "Reds",
-    name = "% Idosos",
-    direction = 1
+  # Favelas (contorno mais forte)
+  geom_sf(
+    data = base_mapa2 %>% dplyr::filter(tipo == "favela"),
+    aes(fill = perc_idosos),
+    color = "black",
+    size = 0.4
   ) +
   
-  theme_minimal() +
-  labs(title = "% de idosos - favelas vs restante do bairro") +
+  # Paleta mais suave
+  scale_fill_gradient(
+    low = "#fde0dd",
+    high = "#a50f15",
+    name = "% População com 60 anos ou mais",
+    breaks = seq(5, 35, 5)
+  ) +
+  
+  labs(
+    title = "Proporção de população idosa sobre população total por FCUs e bairro (ex-FCU)",
+    caption = "Contornos: bairros (linha preta grossa) e favelas (linha preta fina)"
+  ) +
+  
+  # Tema mais limpo (igual paper)
+  theme_void() +
   
   theme(
+    plot.title = element_text(face = "bold", size = 13, hjust = 0),
     legend.position = "right",
-    plot.title = element_text(face = "bold")
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9),
+    
+    # legenda mais "compacta"
+    legend.key.height = unit(1.2, "cm"),
+    legend.key.width = unit(0.4, "cm"),
+    
+    plot.caption = element_text(size = 8)
   )
 
 ggsave(
@@ -198,3 +220,4 @@ ggsave(
   height = 8,
   dpi = 300
 )
+
