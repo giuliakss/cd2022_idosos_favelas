@@ -1,7 +1,7 @@
 # Condições de vida dos idosos em FCUs no Rio de Janeiro (CD 2022)
 
 ## Objetivo
-Esse projeto dá suporte para a comparação entre o perfil demográfico de envelhecimento entre favelas e áreas urbanas de não favela do município do Rio de Janeiro, com dados do censo de 2022 (IBGE).
+Esse projeto dá suporte para a comparação entre o perfil demográfico de envelhecimento entre favelas e áreas urbanas de não favela do município do Rio de Janeiro, com dados do Censo Demográfico de 2022 (IBGE).
 
 ## Estrutura
 
@@ -28,7 +28,7 @@ Foram utilizados os seguintes arquivos:
 - Página de download:  
 https://www.ibge.gov.br/estatisticas/sociais/saude/22827-censo-demografico-2022.html?=&t=downloads
 
-Os arquivos foram utilizados em sua forma original, sem modificações prévias. No script foram filtrados os dados referentes ao município do Rio de Janeiro e tratados os dados faltantes ('X')
+Os arquivos foram utilizados em sua forma original, sem modificações prévias. No script foram filtrados os dados referentes ao município do Rio de Janeiro e tratados os dados faltantes.
 
 Além disso, os arquivos dos contornos dos bairros e dos setores censitários foram adquiridos através do endereço web:
 https://www.ibge.gov.br/geociencias/organizacao-do-territorio/estrutura-territorial/26565-malhas-de-setores-censitarios-divisoes-intramunicipais.html
@@ -42,7 +42,6 @@ e os arquivos SHAPE File de bairros por UF foi encontrado neste endereço web:
 [link para malha territorial bairros](
 https://www.ibge.gov.br/geociencias/downloads-geociencias.html?caminho=organizacao_do_territorio/malhas_territoriais/malhas_de_setores_censitarios__divisoes_intramunicipais/censo_2022/bairros/shp/UF)
 
+## Reprodutibilidade dos resultados
 
-
-
-
+Para reproduzir os resultados deste repositório, é necessário baixar os arquivos brutos nos links acima, colocá-los na pasta `brutos` dentro da pasta `dados` e executar os scripts na ordem indicada pelos nomes.
