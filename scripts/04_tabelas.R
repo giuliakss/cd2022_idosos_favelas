@@ -43,6 +43,7 @@ indicadores_municipais <- adicionar_indicador(
   vars_den
 )
 
+
 # ------------------------
 # % Pretos ou Pardos
 # ------------------------
@@ -364,6 +365,24 @@ indicadores_municipais <- adicionar_indicador(
   vars_den
 )
 
+
+# ------------------------
+# Índice de envelhecimento 65+
+# ------------------------
+
+vars_num <- vars_total_pop_65_ou_mais
+vars_den <- vars_tot_pop_0_a_14
+
+indicadores_municipais <- adicionar_indicador(
+  "Índice envelhecimento 65+",
+  indicadores_municipais,
+  setores_rj,
+  calcular_taxa,
+  vars_num,
+  vars_den
+)
+
+
 # ------------------------
 # 3. Salvar resultados
 # ------------------------
@@ -378,7 +397,36 @@ write.csv(
 )
 
 # ------------------------
-# Fim
+# Vendo tabela de resultados 
 # ------------------------
 
 View(indicadores_municipais)
+
+# ------------------------
+# Exportando base para uso do QGIS
+# ------------------------
+
+sf::st_write(base_mapa2, "base_mapa2.gpkg")
+
+# ------------------------
+# Exportando base para uso do QGIS
+# ------------------------
+
+
+base_mapa2 %>% 
+    dplyr::filter(tipo =="favela") %>% 
+    dplyr::arrange(desc(perc_idosos)) %>%
+    dplyr::select(CD_BAIRRO, nome, perc_idosos)
+
+
+
+base_mapa2 %>% 
+    dplyr::filter(tipo !="favela") %>% 
+    dplyr::arrange(desc(perc_idosos)) %>%
+    dplyr::select(CD_BAIRRO, nome, perc_idosos)
+
+
+setores_rj %>% 
+  dplyr::filter(grepl("Vila Abrolhos", NM_FCU)) %>% 
+  dplyr::select(NM_FCU, NM_BAIRRO)
+

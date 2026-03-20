@@ -24,7 +24,12 @@ tratar_colunas <- function(df, colunas) {
   df %>%
     mutate(across(
       all_of(colunas_validas),
-      ~ as.numeric(ifelse(. == "X", 3, ifelse(is.na(.), 0, .)))
+      ~ as.numeric(
+        ifelse(
+          is.na(.), 0,
+          ifelse(. == "X", 3, .)
+        )
+      )
     ))
 }
 
@@ -72,7 +77,10 @@ tratar_base_taxa <- function(df, vars_num, vars_denom) {
 calcular_taxa <- function(df, vars_num, vars_denom) {
   
   df_tratado <- tratar_base_taxa(df, vars_num, vars_denom)
-  
+  print("numerador é:")
+  print(sum(df_tratado$numerador))
+  print("denominador é:")
+  print(sum(df_tratado$denominador))
   sum(df_tratado$numerador) / sum(df_tratado$denominador)
 }
 

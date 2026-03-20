@@ -12,6 +12,7 @@ library(sf)
 # Funções auxiliares
 # ------------------------
 source("scripts/01_funcoes_auxiliares.R")
+source("scripts/00_variaveis.R")
 
 # ------------------------
 # 1. Leitura dos dados brutos
@@ -80,39 +81,23 @@ colunas_para_tratar <- names(base_setores_geo)[
 
 base_setores_geo <- tratar_colunas(base_setores_geo, colunas_para_tratar)
 
-# ------------------------
-# 8. Join espacial dos setores para bairros
-# ------------------------
-
-setores_com_bairro <- sf::st_join(base_setores_geo, bairros_rj)
-
-setores_com_bairro <- setores_com_bairro |>
-  dplyr::rename(
-    NM_BAIRRO = NM_BAIRRO.y,
-    CD_BAIRRO = CD_BAIRRO.y   
-  )
-
-# a variável de CD_BAIRRO é a que veio da base de shape files do bairro mesmo e ainda não era numérica
-
-setores_com_bairro <- setores_com_bairro %>%
-  mutate(
-    CD_BAIRRO = as.numeric(CD_BAIRRO)
- ) 
+base_setores_geo <- base_setores_geo %>%
+  filter(CD_SIT <= 3)
 
 # ------------------------
-# 9. Agregação por bairro (somando todas colunas numéricas)
+# 8. Agregação por bairro (via CD_BAIRRO)
 # ------------------------
 
-# Somar dentro do mesmo bairro colunas de variáveis do CD2022
-colunas_para_somar <- names(setores_com_bairro)[
-  grepl("^V", names(setores_com_bairro))]
+colunas_para_somar <- names(base_setores_geo)[
+  grepl("^V", names(base_setores_geo))
+]
 
-# ---------Separar info e geometria ---------
-
-# agregação (sem geometria)
-base_bairros_info <- setores_com_bairro |>
+base_bairros_info <- base_setores_geo |>
   sf::st_drop_geometry() |>
-  dplyr::group_by(NM_BAIRRO, CD_BAIRRO) |>
+  
+  tratar_colunas(colunas_para_somar) |>
+  
+  dplyr::group_by(CD_BAIRRO) |>
   dplyr::summarise(
     dplyr::across(
       dplyr::all_of(colunas_para_somar),
@@ -121,13 +106,32 @@ base_bairros_info <- setores_com_bairro |>
     .groups = "drop"
   )
 
-# pegar geometria dos bairros
 bairros_geo <- bairros_rj |>
-  dplyr::select(NM_BAIRRO, geometry)
+  dplyr::select(CD_BAIRRO, NM_BAIRRO, geometry) |>
+  mutate(CD_BAIRRO = as.numeric(CD_BAIRRO))
 
-# juntar info + geometria
 base_bairros <- bairros_geo |>
-  dplyr::left_join(base_bairros_info, by = "NM_BAIRRO")
+  dplyr::left_join(base_bairros_info, by = "CD_BAIRRO")
+
+
+#checks de sanidade 
+
+sum(base_setores_geo$V01387)
+
+sum(base_bairros$V01387)
+
+sum(base_setores_geo$V01387)==sum(base_bairros$V01387)
+
+
+
+base_setores_geo %>%
+  st_drop_geometry() %>%
+  summarise(
+    total = sum(across(all_of(vars_total_pop_60_ou_mais)), na.rm = TRUE)
+  ) %>%
+  pull(total)
+
+
 
 # ------------------------
 # 10. Salvar bases
