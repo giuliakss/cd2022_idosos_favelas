@@ -33,6 +33,8 @@ tratar_colunas <- function(df, colunas) {
     ))
 }
 
+# Melhorar: como eu já trato as colunas no script 2, não precisaria chamar essa função em cada cálculo de indicador também
+
 
 # --------------------------------------------------
 # Função: tratar_base_taxa

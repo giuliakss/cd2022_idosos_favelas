@@ -38,6 +38,9 @@ base_setores <- base_setores %>%
 # 4. MAPA 1 (bairros)
 # ------------------------
 
+# Essa visualização não é tão útil para os propósitos deste trabalho mas é mantida porque pode auxiliar em outros estudos espaciais
+# Também pode servir para propósitos de validação
+
 base_bairros <- base_bairros %>%
   mutate(
     pop_idosa = rowSums(across(all_of(vars_total_pop_60_ou_mais)), na.rm = TRUE),
@@ -68,7 +71,7 @@ setores_favela <- base_setores %>%
   filter(CD_TIPO == "1")
 
 # ------------------------
-# 6. CÁLCULO CONSISTENTE (SETOR)
+# 6. Cálculo por setores FCU e ex-fCU e cidade como um todo
 # ------------------------
 
 # ---- FAVELAS
@@ -136,10 +139,6 @@ valores <- c(
   favelas$perc_idosos
 )
 
-check_valores<- c(bairros_sem_favela$pop_idosa,favelas$pop_idosa)
-sum(check_valores)
-sum(bairros_total$pop_idosa_total)
-
 pal2 <- colorNumeric("Reds", domain = valores, na.color = "transparent")
 
 mapa2 <- leaflet() %>%
@@ -175,7 +174,11 @@ mapa2 <- leaflet() %>%
 mapa2
 
 
-#checks de sanidadde
+# Alguns checks de sanidadde
+
+check_valores <- c(bairros_sem_favela$pop_idosa,favelas$pop_idosa)
+sum(check_valores)
+sum(bairros_total$pop_idosa_total)
 
 # total original (setores)
 total_setores <- base_setores %>%
@@ -207,6 +210,9 @@ base_mapa2 <- bind_rows(
     st_drop_geometry() %>%
     mutate(tipo = "Favela")
 )
+
+sum(base_setores$pop_total)
+sum(favelas$pop_total) + sum(bairros_sem_favela$pop_total)
 
 
 # ------------------------
@@ -300,5 +306,3 @@ mapa_leme <- ggplot() +
 
 mapa_leme
 
-sum(base_setores$pop_total)
-sum(favelas$pop_total) + sum(bairros_sem_favela$pop_total)

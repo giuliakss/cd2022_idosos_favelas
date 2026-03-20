@@ -79,6 +79,10 @@ colunas_para_tratar <- names(base_setores_geo)[
   grepl("^V|^CD_", names(base_setores_geo))
 ]
 
+# transformar códigos em numérico e variáveis em numéricas também. Acontece que eu tinha a impressão que na base da malha 
+# o código era numérico e de setores era char, e se por acaso tivesse algum código começando com "0" na hora de importar numérico ele ficaria com um dígito a menos
+# por isso achei melhor tratar tudo como numérico de uma vez.
+
 base_setores_geo <- tratar_colunas(base_setores_geo, colunas_para_tratar)
 
 base_setores_geo <- base_setores_geo %>%
@@ -95,7 +99,7 @@ colunas_para_somar <- names(base_setores_geo)[
 base_bairros_info <- base_setores_geo |>
   sf::st_drop_geometry() |>
   
-  tratar_colunas(colunas_para_somar) |>
+  tratar_colunas(colunas_para_somar) |> #melhorar: aqui tecnicamente não precisaria de novo tratar_colunas de novo
   
   dplyr::group_by(CD_BAIRRO) |>
   dplyr::summarise(
@@ -114,7 +118,7 @@ base_bairros <- bairros_geo |>
   dplyr::left_join(base_bairros_info, by = "CD_BAIRRO")
 
 
-#checks de sanidade 
+#checks de sanidade, a soma de uma variável qualquer na base de setores tem que ser a mesma na base de bairros
 
 sum(base_setores_geo$V01387)
 
@@ -122,7 +126,7 @@ sum(base_bairros$V01387)
 
 sum(base_setores_geo$V01387)==sum(base_bairros$V01387)
 
-
+#número para servir de referência, o total de idosos na base de setores usando essa metodologia
 
 base_setores_geo %>%
   st_drop_geometry() %>%

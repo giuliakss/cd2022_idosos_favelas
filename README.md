@@ -45,3 +45,13 @@ https://www.ibge.gov.br/geociencias/downloads-geociencias.html?caminho=organizac
 ## Reprodutibilidade dos resultados
 
 Para reproduzir os resultados deste repositório, é necessário baixar os arquivos brutos nos links acima, colocá-los na pasta `brutos` dentro da pasta `dados` e executar os scripts na ordem indicada pelos nomes.
+
+## Dependências
+
+O projeto foi desenvolvido utilizando R (versão 4.5.3) e os seguintes pacotes:
+
+- `dplyr` (1.2.0)  
+- `sf` (1.1-0)  
+- `leaflet` (2.2.3)  
+- `ggplot2` (4.0.2)  
+- `ggspatial` (1.1.10)
