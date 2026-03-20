@@ -402,31 +402,5 @@ write.csv(
 
 View(indicadores_municipais)
 
-# ------------------------
-# Exportando base para uso do QGIS
-# ------------------------
 
-sf::st_write(base_mapa2, "base_mapa2.gpkg")
-
-# ------------------------
-# Exportando base para uso do QGIS
-# ------------------------
-
-
-base_mapa2 %>% 
-    dplyr::filter(tipo =="favela") %>% 
-    dplyr::arrange(desc(perc_idosos)) %>%
-    dplyr::select(CD_BAIRRO, nome, perc_idosos)
-
-
-
-base_mapa2 %>% 
-    dplyr::filter(tipo !="favela") %>% 
-    dplyr::arrange(desc(perc_idosos)) %>%
-    dplyr::select(CD_BAIRRO, nome, perc_idosos)
-
-
-setores_rj %>% 
-  dplyr::filter(grepl("Vila Abrolhos", NM_FCU)) %>% 
-  dplyr::select(NM_FCU, NM_BAIRRO)
 
